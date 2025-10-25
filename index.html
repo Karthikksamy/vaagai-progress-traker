@@ -1,0 +1,984 @@
+#4f46e5;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: background-color 0.2s;
+            cursor: pointer;
+        }
+        .btn-primary:hover {
+            background-color: #4338ca;
+        }
+        .btn-primary:disabled {
+            background-color: #a5b4fc;
+            cursor: not-allowed;
+        }
+        .btn-secondary {
+            background-color: #f3f4f6;
+            color: #1f2937;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: background-color 0.2s;
+            cursor: pointer;
+        }
+        .btn-secondary:hover {
+            background-color: #e5e7eb;
+        }
+        /* Custom scrollbar for log area */
+        .log-containe<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vaagai (Progress Tracker)</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for aesthetic enhancements */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f7fafc;
+        }
+        .card {
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
+            border: 1px solid #e2e8f0;
+        }
+        .btn-primary {
+            background-color: r {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body class="min-h-screen p-4 sm:p-8 bg-gray-100">
+
+    <header class="mb-8 text-center">
+        <h1 class="text-4xl font-extrabold text-indigo-700">Vaagai Progress Tracker</h1>
+        <p class="text-gray-500 mt-1">Collaborative Student Progress and Syllabus Tracking</p>
+    </header>
+
+    <!-- Loading Spinner -->
+    <div id="loading-indicator" class="text-center p-8">
+        <div class="animate-spin inline-block w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full" role="status"></div>
+        <p class="text-indigo-600 mt-2">Initializing app...</p>
+    </div>
+
+    <!-- Main Content Container: Always visible, but sections are hidden -->
+    <div id="app-content" class="max-w-6xl mx-auto hidden">
+        <!-- Role Selection Card: Always visible initially -->
+        <div id="role-selector" class="card text-center mb-8 max-w-lg mx-auto">
+            <h2 class="text-2xl font-semibold text-gray-700 mb-4">Select Your Role</h2>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <!-- REFACTOR: Removed onclick, added id -->
+                <button id="teacher-role-btn" class="btn-primary flex-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block mr-2" viewBox="0 0 20 20" fill="currentColor"><path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"/></svg>
+                    Teacher/TA Login
+                </button>
+                <!-- REFACTOR: Removed onclick, added id -->
+                <button id="parent-role-btn" class="btn-secondary flex-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block mr-2" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0010 11z" clip-rule="evenodd"/></svg>
+                    Parent View
+                </button>
+            </div>
+        </div>
+
+        <!-- Teacher/TA Content (Initial State: Login) -->
+        <div id="teacher-content" class="hidden">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6 border-b pb-2">Teacher & TA Access</h2>
+
+            <!-- Teacher/TA Login Card -->
+            <div id="teacher-login" class="card mb-8 max-w-md mx-auto">
+                <h3 class="text-xl font-semibold text-gray-700 mb-3">Secure Login</h3>
+                <p class="text-sm text-gray-500 mb-4">Use your name and secret code to log in.</p>
+                
+                <input type="text" id="user-name-input" placeholder="Enter Your Name (Karthik, Paneer, etc.)" class="w-full p-3 border border-gray-300 rounded-lg mb-3 focus:ring-indigo-500 focus:border-indigo-500">
+                <input type="password" id="access-code-input" placeholder="Enter Secret Access Code" class="w-full p-3 border border-gray-300 rounded-lg mb-4 focus:ring-indigo-500 focus:border-indigo-500">
+                
+                <!-- REFACTOR: Removed onclick, added id -->
+                <button id="teacher-login-btn" class="btn-primary w-full">Log In</button>
+                <p id="teacher-auth-status" class="mt-4 text-sm font-medium text-red-500"></p>
+            </div>
+
+
+            <!-- Class Setup and Load (Hidden until authenticated) -->
+            <div id="class-setup-section" class="card mb-8 hidden">
+                <h3 class="text-xl font-semibold text-gray-700 mb-3">1. Class Management</h3>
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <input type="text" id="class-name-input" placeholder="Enter Class Name (e.g., '3rd Grade Math')" class="flex-grow p-3 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500">
+                    <!-- REFACTOR: Removed onclick, added id -->
+                    <button id="create-class-btn" class="btn-primary">Create / Load Class</button>
+                </div>
+                <p id="teacher-status" class="mt-4 text-sm font-medium text-gray-600"></p>
+                <div id="teacher-class-info" class="mt-4 p-3 bg-indigo-50 border-l-4 border-indigo-400 text-indigo-700 hidden rounded-md">
+                    <p class="font-semibold">Current User: <span id="current-user-name"></span> (<span id="current-user-role"></span>)</p>
+                    <p class="font-semibold">Current Class: <span id="current-class-id"></span></p>
+                </div>
+            </div>
+
+            <!-- Main Dashboard (Hidden until class is loaded) -->
+            <div id="teacher-dashboard" class="hidden grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Column 1: Progress Logging -->
+                <div class="lg:col-span-2 space-y-8">
+                    <div class="card">
+                        <h3 class="text-xl font-semibold text-gray-700 mb-4">2. Log Student Progress Statement</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label for="log-student-select" class="block text-sm font-medium text-gray-700 mb-1">Select Student</label>
+                                <select id="log-student-select" class="w-full p-3 border border-gray-300 rounded-lg"></select>
+                            </div>
+                            <div>
+                                <label for="log-goal-select" class="block text-sm font-medium text-gray-700 mb-1">Select Can Do Statement</label>
+                                <select id="log-goal-select" class="w-full p-3 border border-gray-300 rounded-lg"></select>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label for="log-date-input" class="block text-sm font-medium text-gray-700 mb-1">Date</label>
+                                    <input type="date" id="log-date-input" class="w-full p-3 border border-gray-300 rounded-lg">
+                                </div>
+                                <div>
+                                    <label for="log-classifier-select" class="block text-sm font-medium text-gray-700 mb-1">Classifier</label>
+                                    <select id="log-classifier-select" class="w-full p-3 border border-gray-300 rounded-lg">
+                                        <option value="Getting acquainted">1. Getting acquainted</option>
+                                        <option value="Actively trying">2. Actively trying</option>
+                                        <option value="Mastered">3. Mastered</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div>
+                                <label for="log-statement-input" class="block text-sm font-medium text-gray-700 mb-1">Observation/Progress Statement</label>
+                                <textarea id="log-statement-input" rows="3" placeholder="e.g., Liam successfully used plural forms in 4/5 sentences." class="w-full p-3 border border-gray-300 rounded-lg resize-none"></textarea>
+                            </div>
+                            <!-- REFACTOR: Removed onclick, added id -->
+                            <button id="log-progress-btn" class="btn-primary w-full">Log Progress</button>
+                        </div>
+                    </div>
+
+                    <!-- Can Do Statements Management (Limited to Teacher Role) -->
+                    <div id="goals-management-section" class="card">
+                        <h3 class="text-xl font-semibold text-gray-700 mb-4">3. Class Goals (Can Do Statements)</h3>
+                        <div id="can-do-list" class="space-y-2 mb-4">
+                            <!-- Can Do Statements will be rendered here -->
+                        </div>
+                        <div id="add-goal-controls" class="flex flex-col sm:flex-row gap-2">
+                            <input type="text" id="new-can-do-input" placeholder="Add a new Can Do Statement" class="flex-grow p-3 border border-gray-300 rounded-lg">
+                            <!-- REFACTOR: Removed onclick, added id -->
+                            <button id="add-goal-btn" class="btn-secondary">Add Goal</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Column 2: Student Roster (Add Student limited to Teacher Role) -->
+                <div class="lg:col-span-1 space-y-8">
+                    <div class="card">
+                        <h3 class="text-xl font-semibold text-gray-700 mb-4">4. Student Roster (<span id="roster-count">0</span>)</h3>
+                        
+                        <div id="add-student-controls" class="flex flex-col gap-2 mb-4">
+                            <input type="text" id="student-name-input" placeholder="New Student Name" class="p-3 border border-gray-300 rounded-lg">
+                            <!-- REFACTOR: Removed onclick, added id -->
+                            <button id="add-student-btn" class="btn-primary">Add Student</button>
+                        </div>
+
+                        <div id="student-roster" class="space-y-3 log-container">
+                            <!-- Student list will be rendered here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Parent Content -->
+        <div id="parent-content" class="hidden">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6 border-b pb-2">Parent Portal</h2>
+
+            <!-- Parent Login -->
+            <div id="parent-login" class="card mb-8 max-w-md mx-auto">
+                <h3 class="text-xl font-semibold text-gray-700 mb-3">Secure Access</h3>
+                <p class="text-sm text-gray-500 mb-4">Enter the unique code provided by the teacher to view your child's progress.</p>
+                <input type="text" id="parent-access-code" placeholder="Enter Unique Access Code" class="w-full p-3 border border-gray-300 rounded-lg mb-3 focus:ring-indigo-500 focus:border-indigo-500">
+                <!-- REFACTOR: Removed onclick, added id -->
+                <button id="parent-login-btn" class="btn-primary w-full">Log In</button>
+                <p id="parent-status" class="mt-4 text-sm font-medium text-red-500"></p>
+            </div>
+
+            <!-- Parent Dashboard (Hidden until login) -->
+            <div id="parent-dashboard" class="hidden max-w-4xl mx-auto">
+                <div class="card mb-8">
+                    <h3 class="text-2xl font-bold text-indigo-600 mb-2">Welcome, <span id="parent-student-name"></span>!</h3>
+                    <p class="text-gray-600">Teacher: <span id="parent-teacher-id" class="font-medium"></span></p>
+                    <p class="text-gray-600">Class: <span id="parent-class-id" class="font-medium"></span></p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <!-- Column 1: Parent Observation Form -->
+                    <div class="lg:col-span-1 card">
+                        <h3 class="text-xl font-semibold text-gray-700 mb-4">Add Parent Observation</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label for="parent-log-goal-select" class="block text-sm font-medium text-gray-700 mb-1">Select Can Do Statement</label>
+                                <select id="parent-log-goal-select" class="w-full p-3 border border-gray-300 rounded-lg"></select>
+                            </div>
+                            <div>
+                                <label for="parent-log-date-input" class="block text-sm font-medium text-gray-700 mb-1">Date</label>
+                                <input type="date" id="parent-log-date-input" class="w-full p-3 border border-gray-300 rounded-lg">
+                            </div>
+                            <div>
+                                <label for="parent-log-statement-input" class="block text-sm font-medium text-gray-700 mb-1">Observation/Comment</label>
+                                <textarea id="parent-log-statement-input" rows="3" placeholder="e.g., Practiced plural words at home today and did great!" class="w-full p-3 border border-gray-300 rounded-lg resize-none"></textarea>
+                            </div>
+                            <!-- REFACTOR: Removed onclick, added id -->
+                            <button id="parent-log-btn" class="btn-primary w-full">Submit Observation</button>
+                        </div>
+                    </div>
+
+                    <!-- Column 2: Recent Activity Log -->
+                    <div class="lg:col-span-2 card">
+                        <h3 class="text-xl font-semibold text-gray-700 mb-4">Recent Progress Log (Teacher & Parent)</h3>
+                        <div id="parent-activity-log" class="log-container space-y-4">
+                            <p class="text-gray-500">Log will appear here after initial load.</p>
+                            <!-- Activity entries will be rendered here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase Imports and Script -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot, collection, query, orderBy, arrayUnion, arrayRemove, runTransaction } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- GLOBAL VARIABLES (Provided by Canvas Environment) ---
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        // --- AUTHENTICATION MAP ---
+        const AUTH_MAP = {
+            'karthik': { code: 'Vaazhga1', role: 'teacher' },
+            'paneer': { code: 'Vaazhga2', role: 'ta' },
+            'lakshanya': { code: 'Vaazhga3', role: 'ta' },
+            'anshruta': { code: 'Vaazhga4', role: 'ta' },
+        };
+        const MASTER_TEACHER_ID = 'karthik-master-data-001';
+
+        // Initialize Firebase
+        let app;
+        let db;
+        let auth;
+        let userId = null;
+        let userRole = null;
+        let userName = null;
+        let isAuthReady = false; 
+
+        let classData = {
+            classId: null,
+            teacherId: MASTER_TEACHER_ID,
+            students: {}, 
+            goals: []
+        };
+        let parentStudentData = null;
+
+        // REFACTOR: Centralized elements mapping
+        const elements = {
+            loadingIndicator: document.getElementById('loading-indicator'),
+            appContent: document.getElementById('app-content'),
+            roleSelector: document.getElementById('role-selector'),
+            teacherContent: document.getElementById('teacher-content'),
+            parentContent: document.getElementById('parent-content'),
+            
+            // Role Buttons
+            teacherRoleBtn: document.getElementById('teacher-role-btn'),
+            parentRoleBtn: document.getElementById('parent-role-btn'),
+
+            // Teacher/TA Login Elements
+            teacherLoginCard: document.getElementById('teacher-login'),
+            userNameInput: document.getElementById('user-name-input'),
+            accessCodeInput: document.getElementById('access-code-input'),
+            teacherLoginBtn: document.getElementById('teacher-login-btn'),
+            teacherAuthStatus: document.getElementById('teacher-auth-status'),
+            classSetupSection: document.getElementById('class-setup-section'),
+            
+            // Teacher Dashboard Elements
+            classNameInput: document.getElementById('class-name-input'),
+            createClassBtn: document.getElementById('create-class-btn'),
+            teacherStatus: document.getElementById('teacher-status'),
+            teacherClassInfo: document.getElementById('teacher-class-info'),
+            currentClassId: document.getElementById('current-class-id'),
+            currentUserRole: document.getElementById('current-user-role'),
+            currentUserName: document.getElementById('current-user-name'),
+            teacherDashboard: document.getElementById('teacher-dashboard'),
+            
+            // Student Management Elements
+            studentNameInput: document.getElementById('student-name-input'),
+            addStudentBtn: document.getElementById('add-student-btn'),
+            addStudentControls: document.getElementById('add-student-controls'),
+            logStudentSelect: document.getElementById('log-student-select'),
+            rosterCount: document.getElementById('roster-count'),
+            studentRoster: document.getElementById('student-roster'),
+            
+            // Goals Management Elements
+            goalsManagementSection: document.getElementById('goals-management-section'),
+            addGoalControls: document.getElementById('add-goal-controls'),
+            logGoalSelect: document.getElementById('log-goal-select'),
+            logDateInput: document.getElementById('log-date-input'),
+            logClassifierSelect: document.getElementById('log-classifier-select'),
+            logStatementInput: document.getElementById('log-statement-input'),
+            logProgressBtn: document.getElementById('log-progress-btn'),
+            canDoList: document.getElementById('can-do-list'),
+            newCanDoInput: document.getElementById('new-can-do-input'),
+            addGoalBtn: document.getElementById('add-goal-btn'),
+            
+            // Parent Elements
+            parentAccessCode: document.getElementById('parent-access-code'),
+            parentLogin: document.getElementById('parent-login'),
+            parentLoginBtn: document.getElementById('parent-login-btn'),
+            parentDashboard: document.getElementById('parent-dashboard'),
+            parentStudentName: document.getElementById('parent-student-name'),
+            parentTeacherId: document.getElementById('parent-teacher-id'),
+            parentClassId: document.getElementById('parent-class-id'),
+            parentActivityLog: document.getElementById('parent-activity-log'),
+            parentLogGoalSelect: document.getElementById('parent-log-goal-select'),
+            parentLogDateInput: document.getElementById('parent-log-date-input'),
+            parentLogStatementInput: document.getElementById('parent-log-statement-input'),
+            parentLogBtn: document.getElementById('parent-log-btn'),
+            parentStatus: document.getElementById('parent-status')
+        };
+
+        // Default "Can Do Statements"
+        const defaultGoals = [
+            "Read and write 3 letter words. That has உ, ஓ, ஊ வரிசை sounds",
+            "I can understand directions in Tamil",
+            "I can form 3 word sentences ending in verb.",
+            "I can represent plural words",
+            "I can recognize gender in context and use the right gender while speaking and writing",
+            "I can use the right tense"
+        ];
+
+        // --- UTILITIES ---
+
+        function generateUniqueId() {
+            return (crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2, 9));
+        }
+
+        // Database Paths (Using _v2 for a fresh start)
+        const getTeacherClassDocRef = (classId) => doc(db, 'artifacts', appId, 'public', 'data', 'vaagai_classes_v2', classId);
+        const getPublicAccessDocRef = (accessCode) => doc(db, 'artifacts', appId, 'public', 'data', 'access_codes_v2', accessCode);
+
+        // --- RENDER FUNCTIONS ---
+
+        function renderStudentRoster() {
+            elements.studentRoster.innerHTML = '';
+            elements.logStudentSelect.innerHTML = '';
+            elements.rosterCount.textContent = Object.keys(classData.students).length;
+
+            const studentArray = Object.values(classData.students).sort((a, b) => a.name.localeCompare(b.name));
+
+            studentArray.forEach(student => {
+                // Roster display
+                const studentDiv = document.createElement('div');
+                studentDiv.className = 'p-3 border border-gray-200 rounded-lg bg-white flex justify-between items-center';
+                studentDiv.innerHTML = `
+                    <div>
+                        <p class="font-medium text-gray-800">${student.name}</p>
+                        <p class="text-xs text-gray-500 mt-0.5 break-all">Code: <span class="font-mono text-indigo-600">${student.accessCode}</span></p>
+                    </div>
+                `;
+                elements.studentRoster.appendChild(studentDiv);
+
+                // Log Select dropdown
+                const option = document.createElement('option');
+                option.value = student.id;
+                option.textContent = student.name;
+                elements.logStudentSelect.appendChild(option);
+            });
+        }
+
+        function renderCanDoStatements() {
+            elements.canDoList.innerHTML = '';
+            elements.logGoalSelect.innerHTML = '';
+            elements.parentLogGoalSelect.innerHTML = '';
+
+            classData.goals.forEach((goal, index) => {
+                // Teacher display list
+                const goalDiv = document.createElement('div');
+                goalDiv.className = 'p-2 border-b border-gray-100 flex justify-between items-start text-sm';
+                
+                const goalText = document.createElement('span');
+                goalText.className = 'flex-1 text-gray-700';
+                goalText.textContent = `${index + 1}. ${goal}`;
+                goalDiv.appendChild(goalText);
+
+                if (userRole === 'teacher') {
+                    const removeBtn = document.createElement('button');
+                    removeBtn.className = 'ml-4 text-red-500 hover:text-red-700 text-xs font-medium';
+                    removeBtn.textContent = 'Remove';
+                    // REFACTOR: Attach event listener directly
+                    removeBtn.addEventListener('click', () => removeCanDoStatement(goal));
+                    goalDiv.appendChild(removeBtn);
+                }
+                
+                elements.canDoList.appendChild(goalDiv);
+
+                // Progress Log dropdowns
+                const optionTeacher = document.createElement('option');
+                optionTeacher.value = goal;
+                optionTeacher.textContent = goal;
+                elements.logGoalSelect.appendChild(optionTeacher);
+
+                const optionParent = document.createElement('option');
+                optionParent.value = goal;
+                optionParent.textContent = goal;
+                elements.parentLogGoalSelect.appendChild(optionParent);
+            });
+        }
+
+        function renderParentActivityLog() {
+            elements.parentActivityLog.innerHTML = '';
+
+            if (!parentStudentData || !parentStudentData.progress) {
+                elements.parentActivityLog.innerHTML = '<p class="text-gray-500">No progress statements found for your child.</p>';
+                return;
+            }
+
+            const sortedLog = [...parentStudentData.progress].sort((a, b) => {
+                const dateA = new Date(a.date);
+                const dateB = new Date(b.date);
+                return dateB - dateA;
+            });
+
+            sortedLog.forEach(item => {
+                const logItem = document.createElement('div');
+                
+                let colorClass = 'bg-gray-50 border-gray-200 text-gray-700';
+                let roleTag = 'Parent Observation';
+
+                if (item.reporterRole === 'teacher' || item.reporterRole === 'ta') {
+                    roleTag = 'Teacher Observation'; // Hide specific TA/Teacher name
+                    if (item.classifier === 'Mastered') {
+                        colorClass = 'bg-green-50 border-green-200 text-green-700';
+                    } else if (item.classifier === 'Actively trying') {
+                        colorClass = 'bg-yellow-50 border-yellow-200 text-yellow-700';
+                    } else if (item.classifier === 'Getting acquainted') {
+                        colorClass = 'bg-red-50 border-red-200 text-red-700';
+                    }
+                } else if (item.reporterRole === 'parent') {
+                    colorClass = 'bg-indigo-50 border-indigo-200 text-indigo-700';
+                }
+
+                const classifierPill = item.classifier ? `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-200 text-gray-800">${item.classifier}</span>` : '';
+
+                logItem.className = `p-4 border-l-4 rounded-lg ${colorClass}`;
+                logItem.innerHTML = `
+                    <div class="flex justify-between items-start mb-2">
+                        <p class="font-semibold text-sm">${item.goal}</p>
+                        ${classifierPill}
+                    </div>
+                    <p class="text-sm">${item.statement}</p>
+                    <div class="mt-2 flex justify-between items-center text-xs text-gray-500 border-t pt-2 mt-2">
+                        <span>${roleTag}</span>
+                        <span class="font-mono">${item.date}</span>
+                    </div>
+                `;
+                elements.parentActivityLog.appendChild(logItem);
+            });
+        }
+
+        // --- CORE APPLICATION LOGIC (Internal functions) ---
+
+        const selectRole = (role) => {
+            elements.teacherContent.classList.add('hidden');
+            elements.parentContent.classList.add('hidden');
+            elements.roleSelector.classList.add('hidden');
+
+            if (role === 'teacher-login') {
+                elements.teacherContent.classList.remove('hidden');
+                elements.teacherLoginCard.classList.remove('hidden');
+            } else if (role === 'parent') {
+                elements.parentContent.classList.remove('hidden');
+                elements.parentLogDateInput.value = new Date().toISOString().split('T')[0];
+            }
+        };
+
+        const teacherLogin = async () => {
+            const userNameInput = elements.userNameInput.value.trim().toLowerCase();
+            const code = elements.accessCodeInput.value.trim();
+
+            elements.teacherAuthStatus.textContent = '';
+            if (!userNameInput || !code) {
+                elements.teacherAuthStatus.textContent = 'Please enter both name and secret code.';
+                return;
+            }
+
+            const userAuth = AUTH_MAP[userNameInput];
+
+            if (userAuth && userAuth.code === code) {
+                userRole = userAuth.role;
+                userName = userNameInput.charAt(0).toUpperCase() + userNameInput.slice(1);
+
+                elements.teacherLoginCard.classList.add('hidden');
+                elements.classSetupSection.classList.remove('hidden');
+                elements.currentUserName.textContent = userName;
+                elements.currentUserRole.textContent = userRole.toUpperCase();
+                
+                if (userRole === 'teacher') {
+                    elements.addStudentControls.classList.remove('hidden');
+                    elements.addGoalControls.classList.remove('hidden');
+                } else {
+                    elements.addStudentControls.classList.add('hidden');
+                    elements.addGoalControls.classList.add('hidden');
+                }
+                
+                elements.logDateInput.value = new Date().toISOString().split('T')[0];
+
+            } else {
+                elements.teacherAuthStatus.textContent = 'Invalid username or secret code.';
+            }
+        };
+
+        const createOrLoadClass = async () => {
+            const className = elements.classNameInput.value.trim();
+            if (!className) {
+                elements.teacherStatus.textContent = 'Please enter a class name.';
+                return;
+            }
+
+            if (!isAuthReady) { 
+                elements.teacherStatus.textContent = 'Error: Authentication not fully ready. Please wait a moment and try again.';
+                console.error("Attempted Firestore operation before Auth was ready.");
+                return;
+            }
+
+            const classId = className.toLowerCase().replace(/[^a-z0-9]+/g, '-').substring(0, 50);
+            const classDocRef = getTeacherClassDocRef(classId); 
+
+            elements.teacherStatus.textContent = 'Loading...';
+
+            try {
+                const docSnap = await getDoc(classDocRef);
+                const exists = docSnap.exists();
+
+                if (exists) {
+                    const loadedData = docSnap.data();
+                    classData.classId = classId;
+                    classData.students = loadedData.students || {};
+                    classData.goals = loadedData.goals || [];
+                    elements.teacherStatus.textContent = `Class "${className}" loaded successfully!`;
+                } else {
+                    if (userRole !== 'teacher') {
+                        elements.teacherStatus.textContent = 'Permission denied. Only the master teacher can create a new class.';
+                        return;
+                    }
+
+                    const newClassData = {
+                        className: className,
+                        teacherId: MASTER_TEACHER_ID,
+                        students: {},
+                        goals: defaultGoals,
+                        createdAt: new Date().toISOString()
+                    };
+                    await setDoc(classDocRef, newClassData);
+                    classData.classId = classId;
+                    classData.students = {};
+                    classData.goals = defaultGoals;
+                    elements.teacherStatus.textContent = `Class "${className}" created successfully!`;
+                }
+
+                elements.teacherClassInfo.classList.remove('hidden');
+                elements.currentClassId.textContent = className;
+                elements.teacherDashboard.classList.remove('hidden');
+                startClassListener(classId);
+
+            } catch (error) {
+                console.error("Error creating or loading class:", error);
+                elements.teacherStatus.textContent = 'Error: Could not access class data. Check console for details.';
+            }
+        };
+
+        const addStudent = async () => {
+            if (userRole !== 'teacher') {
+                elements.teacherStatus.textContent = 'Permission denied. Only the master teacher can add students.';
+                return;
+            }
+            
+            const nameInput = elements.studentNameInput;
+            const studentName = nameInput.value.trim();
+
+            if (!classData.classId) {
+                elements.teacherStatus.textContent = 'Please load a class first.';
+                return;
+            }
+            if (!studentName) {
+                alert('Please enter a student name.');
+                return;
+            }
+
+            const studentId = generateUniqueId();
+            const accessCode = studentId.substring(0, 8); 
+
+            const newStudent = {
+                id: studentId,
+                name: studentName,
+                accessCode: accessCode,
+                progress: []
+            };
+
+            const classDocRef = getTeacherClassDocRef(classData.classId);
+
+            try {
+                await runTransaction(db, async (transaction) => {
+                    const classDoc = await transaction.get(classDocRef);
+                    if (!classDoc.exists()) throw "Class document does not exist!";
+
+                    const currentStudents = classDoc.data().students || {};
+                    currentStudents[studentId] = newStudent;
+
+                    transaction.update(classDocRef, { students: currentStudents });
+
+                    const publicDocRef = getPublicAccessDocRef(accessCode);
+                    transaction.set(publicDocRef, {
+                        teacherId: MASTER_TEACHER_ID,
+                        classId: classData.classId,
+                        studentId: studentId,
+                        studentName: studentName,
+                        className: classDoc.data().className
+                    });
+                });
+
+                nameInput.value = '';
+                elements.teacherStatus.textContent = `Student ${studentName} added! Access Code: ${accessCode}`;
+
+            } catch (error) {
+                console.error("Transaction failed: Failed to add student", error);
+                elements.teacherStatus.textContent = 'Error adding student. Check console for details.';
+            }
+        };
+
+        const addCanDoStatement = async () => {
+            if (userRole !== 'teacher') {
+                elements.teacherStatus.textContent = 'Permission denied. Only the master teacher can add goals.';
+                return;
+            }
+
+            const newGoal = elements.newCanDoInput.value.trim();
+            if (!classData.classId) {
+                elements.teacherStatus.textContent = 'Please load a class first.';
+                return;
+            }
+            if (!newGoal) return;
+
+            const classDocRef = getTeacherClassDocRef(classData.classId);
+
+            try {
+                await updateDoc(classDocRef, {
+                    goals: arrayUnion(newGoal)
+                });
+                elements.newCanDoInput.value = '';
+                elements.teacherStatus.textContent = `Goal added: ${newGoal}`;
+            } catch (error) {
+                console.error("Error adding goal:", error);
+                elements.teacherStatus.textContent = 'Error adding goal. Check console for details.';
+            }
+        };
+
+        const removeCanDoStatement = async (goal) => {
+            if (userRole !== 'teacher') {
+                alert('Permission denied. Only the master teacher can remove goals.');
+                return;
+            }
+            if (!classData.classId || !confirm(`Are you sure you want to remove the goal: "${goal}"?`)) return;
+
+            const classDocRef = getTeacherClassDocRef(classData.classId);
+
+            try {
+                await updateDoc(classDocRef, {
+                    goals: arrayRemove(goal)
+                });
+                elements.teacherStatus.textContent = `Goal removed: ${goal}`;
+            } catch (error) {
+                console.error("Error removing goal:", error);
+                elements.teacherStatus.textContent = 'Error removing goal. Check console for details.';
+            }
+        };
+
+        const logProgress = async () => {
+            const studentId = elements.logStudentSelect.value;
+            const goal = elements.logGoalSelect.value;
+            const date = elements.logDateInput.value;
+            const classifier = elements.logClassifierSelect.value;
+            const statement = elements.logStatementInput.value.trim();
+
+            if (!studentId || !goal || !date || !statement) {
+                alert('Please select a student, a goal, a date, and enter an observation statement.');
+                return;
+            }
+
+            const newLogEntry = {
+                id: generateUniqueId(),
+                goal: goal,
+                date: date,
+                classifier: classifier,
+                statement: statement,
+                reporterRole: userRole,
+                reporterName: userName,
+                timestamp: new Date().toISOString()
+            };
+
+            const classDocRef = getTeacherClassDocRef(classData.classId);
+
+            try {
+                await runTransaction(db, async (transaction) => {
+                    const classDoc = await transaction.get(classDocRef);
+                    if (!classDoc.exists()) throw "Class document does not exist!";
+
+                    const currentStudents = classDoc.data().students;
+                    const studentToUpdate = currentStudents[studentId];
+
+                    if (!studentToUpdate) throw "Student not found!";
+
+                    studentToUpdate.progress = studentToUpdate.progress || [];
+                    studentToUpdate.progress.push(newLogEntry);
+
+                    transaction.update(classDocRef, {
+                        [`students.${studentId}`]: studentToUpdate
+                    });
+                });
+
+                elements.logStatementInput.value = '';
+                elements.teacherStatus.textContent = `Progress logged for ${classData.students[studentId].name}.`;
+            } catch (error) {
+                console.error("Transaction failed: Failed to log progress", error);
+                elements.teacherStatus.textContent = 'Error logging progress. Check console for details.';
+            }
+        };
+
+        // --- PARENT LOGIC ---
+
+        const parentLogin = async () => {
+            const accessCode = elements.parentAccessCode.value.trim();
+            elements.parentStatus.textContent = '';
+            if (!accessCode) {
+                elements.parentStatus.textContent = 'Please enter the access code.';
+                return;
+            }
+
+            try {
+                const publicDocSnap = await getDoc(getPublicAccessDocRef(accessCode));
+
+                if (!publicDocSnap.exists()) {
+                    elements.parentStatus.textContent = 'Login failed: Invalid or expired access code.';
+                    return;
+                }
+
+                const publicData = publicDocSnap.data();
+                const { classId, studentId, studentName, className } = publicData;
+
+                const classDocRef = getTeacherClassDocRef(classId);
+                const classDocSnap = await getDoc(classDocRef);
+
+                if (!classDocSnap.exists()) {
+                    elements.parentStatus.textContent = 'Error: Linked class data not found.';
+                    return;
+                }
+
+                const studentData = classDocSnap.data().students[studentId];
+                if (!studentData) {
+                    elements.parentStatus.textContent = 'Error: Student data not found in class roster.';
+                    return;
+                }
+
+                parentStudentData = studentData;
+                classData.classId = classId;
+                classData.teacherId = MASTER_TEACHER_ID;
+                classData.goals = classDocSnap.data().goals || [];
+
+                elements.parentLogin.classList.add('hidden');
+                elements.parentDashboard.classList.remove('hidden');
+                elements.parentStudentName.textContent = studentName;
+                elements.parentTeacherId.textContent = classDocSnap.data().teacherId;
+                elements.parentClassId.textContent = className || classId;
+
+                renderCanDoStatements();
+                renderParentActivityLog();
+
+                startParentListener(classId, studentId);
+                elements.parentLogDateInput.value = new Date().toISOString().split('T')[0];
+
+            } catch (error) {
+                console.error("Parent login error:", error);
+                elements.parentStatus.textContent = 'A network error occurred. Check console for details.';
+            }
+        };
+
+        const logParentObservation = async () => {
+            const goal = elements.parentLogGoalSelect.value;
+            const date = elements.parentLogDateInput.value;
+            const statement = elements.parentLogStatementInput.value.trim();
+
+            if (!classData.classId || !parentStudentData) {
+                elements.parentStatus.textContent = 'Please log in first.';
+                return;
+            }
+            if (!goal || !date || !statement) {
+                alert('Please select a goal, a date, and enter an observation.');
+                return;
+            }
+
+            const newLogEntry = {
+                id: generateUniqueId(),
+                goal: goal,
+                date: date,
+                classifier: null,
+                statement: statement,
+                reporterRole: 'parent',
+                timestamp: new Date().toISOString()
+            };
+
+            const classDocRef = getTeacherClassDocRef(classData.classId);
+            const studentId = parentStudentData.id;
+
+            try {
+                await runTransaction(db, async (transaction) => {
+                    const classDoc = await transaction.get(classDocRef);
+                    if (!classDoc.exists()) throw "Class document does not exist!";
+
+                    const currentStudents = classDoc.data().students;
+                    const studentToUpdate = currentStudents[studentId];
+
+                    if (!studentToUpdate) throw "Student not found!";
+
+                    studentToUpdate.progress = studentToUpdate.progress || [];
+                    studentToUpdate.progress.push(newLogEntry);
+
+                    transaction.update(classDocRef, {
+                        [`students.${studentId}`]: studentToUpdate
+                    });
+                });
+
+                elements.parentLogStatementInput.value = '';
+                elements.parentStatus.textContent = `Observation submitted successfully!`;
+            } catch (error) {
+                console.error("Transaction failed: Failed to log parent observation", error);
+                elements.parentStatus.textContent = 'Error submitting observation. Check console for details.';
+            }
+        };
+
+        // --- FIREBASE LISTENERS ---
+
+        let unsubscribeClass = null;
+        let unsubscribeParent = null;
+
+        function startClassListener(classId) {
+            if (unsubscribeClass) unsubscribeClass();
+            const q = getTeacherClassDocRef(classId);
+            unsubscribeClass = onSnapshot(q, (doc) => {
+                if (doc.exists()) {
+                    const data = doc.data();
+                    classData.students = data.students || {};
+                    classData.goals = data.goals || [];
+                    renderStudentRoster();
+                    renderCanDoStatements();
+                }
+            }, (error) => {
+                console.error("Teacher Class Listener error:", error);
+                elements.teacherStatus.textContent = 'Real-time update error. Check console.';
+            });
+        }
+
+        function startParentListener(classId, studentId) {
+            if (unsubscribeParent) unsubscribeParent();
+            const q = getTeacherClassDocRef(classId);
+            unsubscribeParent = onSnapshot(q, (doc) => {
+                if (doc.exists()) {
+                    const data = doc.data();
+                    const studentData = data.students[studentId];
+                    if (studentData) {
+                        parentStudentData = studentData;
+                        classData.goals = data.goals || [];
+                        renderCanDoStatements();
+                        renderParentActivityLog();
+                    }
+                }
+            }, (error) => {
+                console.error("Parent Class Listener error:", error);
+                elements.parentStatus.textContent = 'Real-time update error. Check console.';
+            });
+        }
+
+        // --- INITIALIZATION ---
+        
+        // REFACTOR: This function will hold all event listener attachments
+        function initializeEventListeners() {
+            elements.teacherRoleBtn.addEventListener('click', () => selectRole('teacher-login'));
+            elements.parentRoleBtn.addEventListener('click', () => selectRole('parent'));
+            
+            elements.teacherLoginBtn.addEventListener('click', teacherLogin);
+            elements.createClassBtn.addEventListener('click', createOrLoadClass);
+            elements.addStudentBtn.addEventListener('click', addStudent);
+            elements.addGoalBtn.addEventListener('click', addCanDoStatement);
+            elements.logProgressBtn.addEventListener('click', logProgress);
+            
+            elements.parentLoginBtn.addEventListener('click', parentLogin);
+            elements.parentLogBtn.addEventListener('click', logParentObservation);
+        }
+
+        async function initializeAppAndAuth() {
+            setLogLevel('Debug');
+            if (Object.keys(firebaseConfig).length === 0) {
+                console.error("Firebase configuration is missing.");
+                elements.loadingIndicator.textContent = "Error: Firebase config missing.";
+                return;
+            }
+
+            try {
+                app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+
+                await new Promise(resolve => {
+                    const unsubscribe = onAuthStateChanged(auth, (user) => {
+                        if (user) {
+                            userId = user.uid;
+                        } else {
+                            userId = generateUniqueId();
+                        }
+                        isAuthReady = true;
+                        unsubscribe();
+                        resolve();
+                    });
+                });
+
+            } catch (error) {
+                console.error("Firebase Initialization/Authentication Error:", error);
+                elements.loadingIndicator.textContent = "Error initializing application. Check console.";
+            } finally {
+                // Show the app and hide the spinner
+                elements.loadingIndicator.classList.add('hidden');
+                elements.appContent.classList.remove('hidden');
+            }
+        }
+        
+        // REFACTOR: Wait for DOM to be ready before doing anything
+        document.addEventListener('DOMContentLoaded', () => {
+            // 1. Attach all button listeners
+            initializeEventListeners();
+            
+            // 2. Start Firebase auth and app logic
+            initializeAppAndAuth();
+        });
+
+    </script>
+</body>
+</html>
+
+
